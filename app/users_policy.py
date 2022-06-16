@@ -17,6 +17,3 @@ class UsersPolicy:
     #Review Section  
     def update_review(self):
         return current_user.is_admin or current_user.is_moder
-    
-
-        

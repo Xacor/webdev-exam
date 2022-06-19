@@ -3,6 +3,7 @@ from sqlalchemy import MetaData
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 
+
 app = Flask(__name__)
 application = app
 
@@ -21,11 +22,26 @@ db = SQLAlchemy(app, metadata=metadata)
 migrate = Migrate(app, db)
 
 from auth import bp as auth_bp, init_login_manager
+from books import bp as books_bp
+
 app.register_blueprint(auth_bp)
+app.register_blueprint(books_bp)
 init_login_manager(app)
 
 
 
+PER_PAGE = 4
+from models import Book
 @app.route('/')
 def index():
-    return render_template('index.html')
+    page = request.args.get('page', 1, type=int)
+
+    books = Book.query.order_by(Book.year.desc())
+    pagination = books.paginate(page, PER_PAGE)
+    books = pagination.items
+
+
+    return render_template('index.html', 
+                            books=books, 
+                            pagination=pagination,
+                            )

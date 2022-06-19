@@ -20,7 +20,7 @@ class User(db.Model, UserMixin):
     middle_name = db.Column(db.String(100))
 
     created_at = db.Column(db.DateTime, nullable=False, server_default=sa.sql.func.now())
-    role = db.Column(db.Integer,  db.ForeignKey('roles.id'), nullable=False)
+    role_id = db.Column(db.Integer,  db.ForeignKey('roles.id'), nullable=False)
 
     def set_password(self, password: str):
         self.password_hash = generate_password_hash(password)
@@ -59,6 +59,12 @@ class Role(db.Model):
     def __repr__(self):
         return '<Role %r>' % self.name
 
+books_genres = db.Table('books_genres',
+    db.Column('id', db.Integer, primary_key=True),
+    db.Column('book_id', db.Integer, db.ForeignKey('books.id'), nullable=False),
+    db.Column('genre_id', db.Integer, db.ForeignKey('genres.id'), nullable=False)
+)
+
 class Book(db.Model):
     __tablename__ = 'books'
 
@@ -69,6 +75,19 @@ class Book(db.Model):
     publisher = db.Column(db.String(200), nullable=False)
     author = db.Column(db.String(200), nullable=False)
     volume = db.Column(db.Integer, nullable=False)
+    rating_sum = db.Column(db.Integer, nullable=False, default=0)
+    rating_num = db.Column(db.Integer, nullable=False, default=0)
+
+    genres = db.relationship('Genre', secondary=books_genres, lazy='subquery')
+
+    
+
+    @property
+    def rating(self):
+        if self.rating_num > 0:
+            return self.rating_sum / self.rating_num
+        else:
+            return 0
 
     def __repr__(self):
         return '<Book %r>' % self.name
@@ -114,9 +133,3 @@ class Genre(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(200), unique=True, nullable=False)
-
-books_genres = db.Table('books_genres',
-    db.Column('id', db.Integer, primary_key=True),
-    db.Column('book_id', db.Integer, db.ForeignKey('books.id'), nullable=False),
-    db.Column('genre_id', db.Integer, db.ForeignKey('genres.id'), nullable=False)
-)

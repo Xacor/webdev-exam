@@ -1,4 +1,51 @@
 {% extends 'base.html' %}
 
+{% from 'pagination.html' import render_pagination %}
+
 {% block content %}
+<div class="row align-items-start my-3">
+    {% for book in books %}
+    <div class="card mb-3 {% if loop.last %} ms-5 {% else %} mx-5 {% endif %}" style="max-width: 540px;" >
+        <div class="row g-0">
+            <div class="col-md-4">
+                <img src="..." class="img-fluid rounded-start" alt="">
+            </div>
+            <div class="col-md-8">
+                <div class="card-body">
+                    <h5 class="card-title">{{ book.name }}</h5>
+                    <h6 class="card-subtitle mb-2 text-muted">{{ book.year }}</h6>
+
+                    <ul class="list-group list-group-flush ">
+                        {% for genre in book.genres %}
+                            <li class="list-group-item ps-0">{{ genre.name }}</li>
+                        {% endfor %}
+                    </ul>
+                    <p class="card-text border-top">Оценка: {{ book.rating }}</p>
+                    <p class="card-text">Рецензий: {{ book.rating_num }}</p>
+                    <div class="btn-group mt-3" role="group" aria-label="Basic example">
+                        <a type="button" class="btn btn-primary" href="{{ url_for('books.show', book_id=book.id) }}">Просмотр</a>
+                        {% if current_user.is_authenticated and current_user.can('update_book', record=book) %}
+                            <a type="button" class="btn btn-secondary" href="{{ url_for('books.update') }}">Редактирование</a>
+                        {% endif %}
+                        {% if current_user.is_authenticated and current_user.can('delete_book', record=book) %}
+                            <button type="button" class="btn btn-danger" data-url="{# url_for('delete', user_id=user.id) #}" data-bs-toggle="modal"
+                                data-bs-target="#delete-user-modal">Удалить</button>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<div class="row my-5">
+{% if current_user.is_authenticated and current_user.can('create_book') %}
+    <a class="btn btn-primary w-25 mx-auto" href="{{ url_for('books.new') }}">Добавить книгу</a>
+{% endif %}
+</div>
+<div class="mb-5">
+    {{ render_pagination(pagination, request.endpoint) }}
+</div>
+
 {% endblock %}

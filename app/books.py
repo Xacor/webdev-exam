@@ -1,15 +1,20 @@
 from flask import Blueprint, redirect, render_template, request, flash, url_for
-from models import Book, Genre
+from flask_login import current_user, login_required
+from auth import check_rights
+from models import Book, Genre, Review
 from app import db
+from markdown import markdown
+from bleach import clean
 
 bp = Blueprint('books', __name__, url_prefix='/books')
 
 PER_PAGE = 4
 
 BOOK_PARAMS = ['name','desc' ,'year', 'publisher', 'author', 'volume']
+REVIEW_PARAMS = ['rating', 'text']
 
 def params(param):
-    return {p: request.form.get(p) for p in param }
+    return {p: clean(request.form.get(p)) for p in param }
 
 
 
@@ -28,11 +33,15 @@ def index():
                             )
 
 @bp.route('/new')
+@login_required
+@check_rights('create_book')
 def new():
     genres = Genre.query.all()
     return render_template('books/new.html', genres=genres)
 
 @bp.route('/create', methods=['POST'])
+@login_required
+@check_rights('create_book')
 def create():
     book = Book(**params(BOOK_PARAMS))
 
@@ -44,15 +53,58 @@ def create():
     db.session.add(book)
     db.session.commit()
 
-    # print(params(BOOK_PARAMS), genres_ids)
-    return redirect(url_for('index')) #переделать редирект
+    return redirect(url_for('books.show', book_id=book.id))
 
-@bp.route('/update')
-def update():
+@bp.route('/<int:book_id>/edit')
+@login_required
+def edit(book_id):
     genres = Genre.query.all()
-    return render_template('books/update.html', genres=genres)
+    book = Book.query.get(book_id)
 
-@bp.route('/show/<int:book_id>')
+    return render_template('books/edit.html', genres=genres, book=book)
+
+@bp.route('/<int:book_id>/update', methods=['POST'])
+@login_required
+@check_rights('update_book')
+def update(book_id):
+    book = Book.query.get(book_id)
+
+    updated_book = Book(**params(BOOK_PARAMS))
+    book = updated_book
+    print(book)
+
+    db.session.commit()
+
+    return redirect(url_for('books.show', book_id=book.id))
+
+@bp.route('/<int:book_id>')
 def show(book_id):
     book = Book.query.get(book_id)
-    return render_template('books/show.html', book=book)
+    desc = markdown(book.desc)
+
+    reviews = Review.query.filter(Review.book_id == book_id).order_by(Review.created_at.desc())
+
+    curr_review = None
+    if current_user.is_authenticated:
+        curr_review = Review.query.filter(Review.book_id == book_id).filter(Review.user_id == current_user.id).first()
+    return render_template('books/show.html', book=book, desc=desc, curr_review=curr_review, reviews=reviews)
+
+
+@bp.route('/<int:book_id>/review')
+@login_required
+def review(book_id):
+    return render_template('books/review.html', book_id=book_id)
+
+
+@bp.route('/<int:book_id>/review/create', methods=['POST'])
+@login_required
+def create_review(book_id):
+    new_review = Review(**params(REVIEW_PARAMS), book_id=book_id, user_id=current_user.id)
+    db.session.add(new_review)
+
+    book = Book.query.get(book_id)
+    book.rating_num += 1
+    book.rating_sum += int(new_review.rating)
+
+    db.session.commit()
+    return redirect(url_for('books.show', book_id=book.id))

@@ -6,6 +6,7 @@ from werkzeug.security import check_password_hash, generate_password_hash
 from flask_login import UserMixin
 from users_policy import UsersPolicy
 from sqlalchemy.dialects.mysql import YEAR
+from markdown import markdown
 
 
 class User(db.Model, UserMixin):
@@ -89,6 +90,10 @@ class Book(db.Model):
         else:
             return 0
 
+    @property
+    def html_desc(self):
+        return markdown(self.desc)
+
     def __repr__(self):
         return '<Book %r>' % self.name
 
@@ -127,6 +132,10 @@ class Review(db.Model):
     
     user = db.relationship('User', uselist=False)
     book = db.relationship('Book', uselist=False)
+
+    @property
+    def html_text(self):
+        return markdown(self.text)
 
 class Genre(db.Model):
     __tablename__='genres'

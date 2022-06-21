@@ -5,27 +5,33 @@
 {% block content %}
 <div class="row align-items-start my-3">
     {% for book in books %}
-    <div class="card mb-3 {% if loop.last %} ms-5 {% else %} mx-5 {% endif %}" style="max-width: 540px;" >
+    <div class="card mb-3 py-1 {% if loop.last %} ms-5 {% else %} mx-5 {% endif %}" style="max-width: 540px;" >
         <div class="row g-0">
-            <div class="col-md-4">
-                <img src="..." class="img-fluid rounded-start" alt="">
+            <div class="col-md-4 my-auto">
+                <img src="https://kawai.shikimori.one/system/animes/original/6.jpg?1633690719" class="img-fluid rounded-start" alt="">
             </div>
             <div class="col-md-8">
-                <div class="card-body">
+                <div class="card-body py-0 pe-0">
                     <h5 class="card-title">{{ book.name }}</h5>
                     <h6 class="card-subtitle mb-2 text-muted">{{ book.year }}</h6>
 
-                    <ul class="list-group list-group-flush ">
+                    <ul class="list-group list-group-flush border-bottom">
                         {% for genre in book.genres %}
                             <li class="list-group-item ps-0">{{ genre.name }}</li>
                         {% endfor %}
                     </ul>
-                    <p class="card-text border-top">Оценка: {{ book.rating }}</p>
-                    <p class="card-text">Рецензий: {{ book.rating_num }}</p>
+                    <div class="row mt-3">
+                        <div class="col-6">
+                            <p class="card-text">Оценка: {{ book.rating }}</p>
+                        </div>
+                        <div class="col-6">
+                            <p class="card-text">Рецензий: {{ book.rating_num }}</p>
+                        </div>
+                    </div>
                     <div class="btn-group mt-3" role="group" aria-label="Basic example">
                         <a type="button" class="btn btn-primary" href="{{ url_for('books.show', book_id=book.id) }}">Просмотр</a>
                         {% if current_user.is_authenticated and current_user.can('update_book', record=book) %}
-                            <a type="button" class="btn btn-secondary" href="{{ url_for('books.update') }}">Редактирование</a>
+                            <a type="button" class="btn btn-secondary" href="{{ url_for('books.edit', book_id=book.id) }}">Редактирование</a>
                         {% endif %}
                         {% if current_user.is_authenticated and current_user.can('delete_book', record=book) %}
                             <button type="button" class="btn btn-danger" data-url="{# url_for('delete', user_id=user.id) #}" data-bs-toggle="modal"

@@ -63,4 +63,12 @@ window.onload = function() {
             imageUploadFunction: imageUploadFunction
         });
     }
+
+    if (document.getElementById('text')) {
+        let easyMDE = new EasyMDE({
+            element: document.getElementById('text'),
+            toolbar: TOOLBAR_ITEMS,
+            uploadImage: false
+        });
+    }
 }

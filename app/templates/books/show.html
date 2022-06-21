@@ -1,5 +1,92 @@
 {% extends 'base.html' %}
 
 {% block content %}
-    <p>{{ book.name }}</p>
+    <div class="row">
+        <h3> {{ book.name }}</h4>
+        <div class="col-4">
+            <img src="https://kawai.shikimori.one/system/animes/original/6.jpg?1633690719" class="img-fluid img-thumbnail" alt="...">
+        </div>
+        <div class="col-4">
+            <p>Автор: {{ book.author }}</p>
+            <p>Год издания: {{ book.year }}</p>
+            <p>Издетельство: {{ book.publisher }}</p>
+            <p>Количество страниц: {{ book.volume }}</p>
+        </div>
+        <div class="col-4">
+            <p>Рейтинг: {{ book.rating }}</p>
+            <p>Количество рецензий: {{ book.rating_num }}</p>
+        </div>
+    </div>
+    <div class="row my-5">
+        {{ book.html_desc |safe }}
+    </div>
+    
+    {% if current_user.is_authenticated and not curr_review %}
+        <div class="row">
+            <a class="btn btn-dark my-3 col-2 mx-auto" href="{{ url_for('books.review', book_id=book.id) }}" role="
+                    button">Написать рецензию</a>
+        </div>
+    {% elif curr_review %}
+        <div class="row">
+            <h4>Ваша рецензия</h4>       
+            <div class="d-flex my-5 py-2 border-bottom">
+                <div class="flex-shrink-0">
+                    <img src="{{ url_for('static', filename='images/default-profile-picture-300x300.jpeg') }}"
+                        class="rounded-circle" alt="Sample Image" height="96px">
+                </div>
+                <div class="flex-grow-1 ms-3">
+                    <h5>{{ curr_review.user.first_name }} {{ curr_review.user.last_name }} <small class="text-muted"><i>{{
+                                        curr_review.created_at
+                                        }}</i></small></h5>
+                    {{ curr_review.html_text |safe }}
+                </div>
+                <div>
+                    {% if curr_review.rating == 5 %}
+                    <span>Отлично</span>
+                    {% elif curr_review.rating == 4 %}
+                    <span>Хорошо</span>
+                    {% elif curr_review.rating == 3 %}
+                    <span>Удовлетворительно</span>
+                    {% elif curr_review.rating == 2 %}
+                    <span>Неудовлетворительно</span>
+                    {% elif curr_review.rating == 1 %}
+                    <span>Плохо</span>
+                    {% elif curr_review.rating == 0 %}
+                    <span>Ужасно</span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    {% endif %}
+    <div class="row my-3">
+        {% for rev in reviews %}
+        <div class="d-flex my-3">
+            <div class="flex-shrink-0">
+                <img src="{{ url_for('static', filename='images/default-profile-picture-300x300.jpeg') }}"
+                    class="rounded-circle" alt="Sample Image" height="96px">
+            </div>
+            <div class="flex-grow-1 ms-3">
+                <h5>{{ rev.user.first_name }} {{ rev.user.last_name }} <small class="text-muted"><i>{{ rev.created_at
+                                        }}</i></small></h5>
+                {{ rev.html_text |safe}}
+            </div>
+            <div>
+                {% if rev.rating == 5 %}
+                    <span>Отлично</span>
+                {% elif rev.rating == 4 %}
+                    <span>Хорошо</span>
+                {% elif rev.rating == 3 %}
+                    <span>Удовлетворительно</span>
+                {% elif rev.rating == 2 %}
+                    <span>Неудовлетворительно</span>
+                {% elif rev.rating == 1 %}
+                    <span>Плохо</span>
+                {% elif rev.rating == 0 %}
+                    <span>Ужасно</span>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    
 {% endblock %}

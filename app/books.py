@@ -5,6 +5,8 @@ from models import Book, Genre, Review
 from app import db
 from markdown import markdown
 from bleach import clean
+from sqlalchemy.exc import SQLAlchemyError
+from tools import ImageSaver
 
 bp = Blueprint('books', __name__, url_prefix='/books')
 
@@ -25,6 +27,7 @@ def index():
     books = Book.query.all()
     pagination = books.paginate(page, PER_PAGE)
     books = pagination.items
+
 
 
     return render_template('books/index.html', 
@@ -50,9 +53,26 @@ def create():
         genre = Genre.query.get(id)
         book.genres.append(genre)
 
-    db.session.add(book)
-    db.session.commit()
+    
 
+    try:
+        db.session.add(book)
+        db.session.commit()
+    except SQLAlchemyError as e: 
+        db.session.rollback()
+        flash(f'При добавлении данных произошла ошибка. \n{e}', category='danger')
+        return redirect(url_for('index'))
+    f = request.files.get('preview_img')
+    if f and f.filename:
+        img = ImageSaver(f).save(book.id)
+        if not img:
+            return redirect(url_for('index'))
+
+        book.image.append(img)
+        db.session.add(book)
+        db.session.commit()
+
+    flash('Книга успешно создана.',category='success')
     return redirect(url_for('books.show', book_id=book.id))
 
 @bp.route('/<int:book_id>/edit')
@@ -68,14 +88,13 @@ def edit(book_id):
 @check_rights('update_book')
 def update(book_id):
     book = Book.query.get(book_id)
+    genres_ids = list(map(int, request.form.getlist('genres')))
+    book.update(params(BOOK_PARAMS), genres_ids)
 
-    updated_book = Book(**params(BOOK_PARAMS))
-    book = updated_book
-    print(book)
-
+    db.session.add(book)
     db.session.commit()
 
-    return redirect(url_for('books.show', book_id=book.id))
+    return redirect(url_for('books.show', book_id=book_id))
 
 @bp.route('/<int:book_id>')
 def show(book_id):
@@ -98,6 +117,7 @@ def review(book_id):
 
 @bp.route('/<int:book_id>/review/create', methods=['POST'])
 @login_required
+@check_rights('create_review')
 def create_review(book_id):
     new_review = Review(**params(REVIEW_PARAMS), book_id=book_id, user_id=current_user.id)
     db.session.add(new_review)
@@ -108,3 +128,22 @@ def create_review(book_id):
 
     db.session.commit()
     return redirect(url_for('books.show', book_id=book.id))
+
+@bp.route('/<int:book_id>/delete',  methods=['POST'])
+@login_required
+@check_rights('delete_book')
+def delete(book_id):
+    book = Book.query.get(book_id)
+    
+    try:
+        db.session.delete(book)
+        db.session.commit()
+    except SQLAlchemyError as e:
+        db.session.rollback()
+        flash(f'При удалении данных возникла ошибка. \n{e}', category='danger')
+        return redirect(url_for('index'))
+
+    flash('Книга успешно удалена',category='success')
+    return redirect(url_for('index'))
+
+#sqlalchemy.exc.IntegrityError

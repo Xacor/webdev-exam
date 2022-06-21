@@ -71,4 +71,14 @@ window.onload = function() {
             uploadImage: false
         });
     }
+
+    var myModalEl = document.getElementById('delete-book-modal')
+    myModalEl.addEventListener('show.bs.modal', function (event) {
+        let form = this.querySelector('form');
+        form.action = event.relatedTarget.dataset.url;
+
+        let bookNameElement = document.getElementById('book_name');
+        bookNameElement.innerHTML = event.relatedTarget.closest('.card').querySelector('.card-title').textContent;
+    })
 }
+

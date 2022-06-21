@@ -1,4 +1,5 @@
-from flask import Flask, render_template, session, request, redirect, url_for, flash
+import os
+from flask import Flask, abort, render_template, send_file, session, request, redirect, url_for, flash
 from sqlalchemy import MetaData
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
@@ -31,7 +32,7 @@ init_login_manager(app)
 
 
 PER_PAGE = 4
-from models import Book
+from models import Book, Image
 @app.route('/')
 def index():
     page = request.args.get('page', 1, type=int)
@@ -45,3 +46,11 @@ def index():
                             books=books, 
                             pagination=pagination,
                             )
+
+@app.route('/media/images/<image_id>')
+def image(image_id):
+    image = Image.query.get(image_id)
+    print(image.id)
+    if image:
+        return send_file(os.path.join(app.config['UPLOAD_FOLDER'], image.storage_filename))
+    return abort(404)

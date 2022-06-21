@@ -60,11 +60,34 @@ class Role(db.Model):
     def __repr__(self):
         return '<Role %r>' % self.name
 
+class Image(db.Model):
+    _tablename__ = 'images'
+
+    id = db.Column(db.String(100), primary_key=True)
+    file_name = db.Column(db.String(100), nullable=False)
+    mime_type = db.Column(db.String(100), nullable=False)
+    md5_hash = db.Column(db.String(100), nullable=False, unique=True)
+    
+    book_id = db.Column(db.Integer, db.ForeignKey('books.id'), nullable=False)
+
+    def __repr__(self):
+        return '<Image %r>' % self.file_name
+
+    @property
+    def storage_filename(self):
+        _, ext = os.path.splitext(self.file_name)
+        return self.id + ext
+
+    @property
+    def url(self):
+        return url_for('image', image_id=self.id)
+
 books_genres = db.Table('books_genres',
     db.Column('id', db.Integer, primary_key=True),
     db.Column('book_id', db.Integer, db.ForeignKey('books.id'), nullable=False),
     db.Column('genre_id', db.Integer, db.ForeignKey('genres.id'), nullable=False)
 )
+
 
 class Book(db.Model):
     __tablename__ = 'books'
@@ -80,8 +103,20 @@ class Book(db.Model):
     rating_num = db.Column(db.Integer, nullable=False, default=0)
 
     genres = db.relationship('Genre', secondary=books_genres, lazy='subquery')
+    reviews = db.relationship('Review', cascade="all, delete")
+    image = db.relationship('Image', cascade="all, delete", uselist=False)
 
-    
+    def update(self, params, genres_ids):
+        self.name = params['name']
+        self.desc = params['desc']
+        self.year = params['year']
+        self.publisher = params['publisher']
+        self.author = params['author']
+        self.volume = params['volume']
+
+        for id in genres_ids:
+            genre = Genre.query.get(id)
+            self.genres.append(genre)
 
     @property
     def rating(self):
@@ -97,27 +132,6 @@ class Book(db.Model):
     def __repr__(self):
         return '<Book %r>' % self.name
 
-class Image(db.Model):
-    _tablename__ = 'images'
-
-    id = db.Column(db.Integer, primary_key=True)
-    file_name = db.Column(db.String(100), nullable=False)
-    mime_type = db.Column(db.String(100), nullable=False)
-    md5_hash = db.Column(db.String(100), nullable=False, unique=True)
-    
-    book_id = db.Column(db.Integer, db.ForeignKey('books.id'), nullable=False)
-
-    def __repr__(self):
-        return '<Category %r>' % self.file_name
-
-    @property
-    def storage_filename(self):
-        _, ext = os.path.splitext(self.file_name)
-        return self.id + ext
-
-    @property
-    def url(self):
-        return url_for('image', image_id=self.id)
 
 class Review(db.Model):
     __tablename__='reviews'

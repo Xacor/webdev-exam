@@ -24,9 +24,11 @@ migrate = Migrate(app, db)
 
 from auth import bp as auth_bp, init_login_manager
 from books import bp as books_bp
+from reviews import bp as reviews_bp
 
 app.register_blueprint(auth_bp)
 app.register_blueprint(books_bp)
+app.register_blueprint((reviews_bp))
 init_login_manager(app)
 
 
@@ -50,7 +52,6 @@ def index():
 @app.route('/media/images/<image_id>')
 def image(image_id):
     image = Image.query.get(image_id)
-    print(image.id)
     if image:
         return send_file(os.path.join(app.config['UPLOAD_FOLDER'], image.storage_filename))
     return abort(404)

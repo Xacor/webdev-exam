@@ -1,8 +1,9 @@
+import os
 from flask import Blueprint, redirect, render_template, request, flash, url_for
 from flask_login import current_user, login_required
 from auth import check_rights
-from models import Book, Genre, Review
-from app import db
+from models import Book, Genre, Image, Review
+from app import db, app
 from markdown import markdown
 from bleach import clean
 from sqlalchemy.exc import SQLAlchemyError
@@ -68,7 +69,7 @@ def create():
         if not img:
             return redirect(url_for('index'))
 
-        book.image.append(img)
+        book.image = img
         db.session.add(book)
         db.session.commit()
 
@@ -134,14 +135,23 @@ def create_review(book_id):
 @check_rights('delete_book')
 def delete(book_id):
     book = Book.query.get(book_id)
-    
+      
     try:
         db.session.delete(book)
         db.session.commit()
+
+        image = Image.query.filter_by(book_id=book.id).first()
+        if image:
+            file_path = os.path.join(app.config['UPLOAD_FOLDER'], book.image.storage_filename)
+            os.remove(file_path)
+
     except SQLAlchemyError as e:
         db.session.rollback()
         flash(f'При удалении данных возникла ошибка. \n{e}', category='danger')
         return redirect(url_for('index'))
+
+    if os.path.exists("demofile.txt"):
+        os.remove("demofile.txt")
 
     flash('Книга успешно удалена',category='success')
     return redirect(url_for('index'))

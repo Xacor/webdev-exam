@@ -49,12 +49,12 @@
             <div class="mb-3">
                 <label for="preview_img">Обложка</label>
                 <input class="form-control" type="file" name="preview_img" id="preview_img"
-                    {% if request.endpoint in ['books.update'] %} disabled {% endif %}>
+                    {% if request.endpoint in ['books.edit'] %} disabled {% endif %} required>
             </div>
             <div class="mb-3 background-preview p-3 rounded d-flex align-items-center justify-content-center">
-                <img src="#вставить url обложки" class="img-fluid d-none" alt="">
+                <img src="" class="img-fluid d-none" alt="">
                 <label for="preview_img"
-                    class="btn btn-dark {% if request.endpoint in ['books.update'] %} disabled {% endif %}">Выбрать
+                    class="btn btn-dark {% if request.endpoint in ['books.edit'] %} disabled {% endif %}">Выбрать
                     изображение</label>
             </div>
         </div>

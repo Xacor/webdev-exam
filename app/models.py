@@ -143,7 +143,8 @@ class Review(db.Model):
     rating = db.Column(db.Integer, nullable=False)
     text = db.Column(db.Text, nullable=False)
     created_at = db.Column(db.DateTime, nullable=False, server_default=sa.sql.func.now())
-    
+    status_id = db.Column(db.Integer, db.ForeignKey('statuses.id'), nullable=False, default=0)
+
     user = db.relationship('User', uselist=False)
     book = db.relationship('Book', uselist=False)
 
@@ -156,3 +157,9 @@ class Genre(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(200), unique=True, nullable=False)
+
+class Status(db.Model):
+    __tablename__='statuses'
+
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), unique=True, nullable=False)

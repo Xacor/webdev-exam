@@ -34,7 +34,7 @@
                     <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
                         <li class="nav-item">
                             <a class="nav-link {% if request.endpoint == 'users' %}active{% endif %}"
-                                aria-current="page" href="{# url_for('users') #}">Мои рецензии</a>
+                                aria-current="page" href="{{ url_for('reviews.user_reviews') }}">Мои рецензии</a>
                         </li>
                         <li class="nav-item">
                             {% if current_user.is_authenticated %}
@@ -61,8 +61,8 @@
         {% endwith %}
     </div>
 
-    <main class="my-3 flex-shrink-0">
-        <div class="container">
+    <main class="h-100 flex-shrink-0 bg-light">
+        <div class="container h-100 bg-light">
             {% block content %}
             <h1>Содержимое по умолчанию</h1>
             {% endblock %}

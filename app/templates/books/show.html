@@ -7,14 +7,17 @@
             <img src="{{ book.image.url }}" class="img-fluid img-thumbnail" alt="...">
         </div>
         <div class="col-4">
-            <p>Автор: {{ book.author }}</p>
-            <p>Год издания: {{ book.year }}</p>
-            <p>Издетельство: {{ book.publisher }}</p>
-            <p>Количество страниц: {{ book.volume }}</p>
+            <p class="fs-5">Автор: {{ book.author }}</p>
+            <p class="fs-5">Год издания: {{ book.year }}</p>
+            <p class="fs-5">Издетельство: {{ book.publisher }}</p>
+            <p class="fs-5">Количество страниц: {{ book.volume }}</p>
+            <p class="fs-5">Рейтинг: {{ book.rating }}</p>
+            <p class="fs-5">Количество рецензий: {{ book.rating_num }}</p>
         </div>
         <div class="col-4">
-            <p>Рейтинг: {{ book.rating }}</p>
-            <p>Количество рецензий: {{ book.rating_num }}</p>
+            {% for genre in book.genres %}
+                <p class="fs-5">{{ genre.name }}</p>
+            {% endfor %}
         </div>
     </div>
     <div class="row my-5">

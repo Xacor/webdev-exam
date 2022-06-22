@@ -23,12 +23,9 @@ class ImageSaver():
                         mime_type=self.file.mimetype, 
                         md5_hash=self.md5_hash,
                         book_id=book_id)
-        print('brfore try')
         try:
-            print(self.img)
             db.session.add(self.img)
             db.session.commit()
-            print('after commit')
         except SQLAlchemyError as e:
             db.session.rollback()
             flash(f'Не удалось сохранить изображение!\n{e}', category='danger')

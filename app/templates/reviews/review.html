@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+
+
+{% block content %}
+<div class="d-flex flex-column h-100">
+    <div class="row my-3">
+        <div class="col-5">
+            <p> Название книги: {{ review.book.name }} </p>
+            <p> Пользователь: {{ review.user.first_name }} {{ review.user.last_name }}</p>
+            <p> Дата добавления рецензии: {{ review.created_at }} </p>
+            <p> Оценка: {{ review.rating }} </p>
+        </div>
+    </div>
+    <div class="row">
+        <h4 class="text-center my-3">Текст рецензии</h4>
+        <span>{{ review.html_text |safe }}</span>
+    </div>
+    <div class="btn-group mx-auto mb-5 mt-auto w-50">
+        <a class="btn btn-success" href="{{ url_for('reviews.update', review_id=review.id, accept=True) }}">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-check-lg"
+                viewBox="0 0 16 16">
+                <path
+                    d="M12.736 3.97a.733.733 0 0 1 1.047 0c.286.289.29.756.01 1.05L7.88 12.01a.733.733 0 0 1-1.065.02L3.217 8.384a.757.757 0 0 1 0-1.06.733.733 0 0 1 1.047 0l3.052 3.093 5.4-6.425a.247.247 0 0 1 .02-.022Z" />
+            </svg>
+        </a>
+        <a class="btn btn-danger" href="{{ url_for('reviews.update', review_id=review.id, accept=False) }}">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-dash-circle"
+                viewBox="0 0 16 16">
+                <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z" />
+                <path d="M4 8a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7A.5.5 0 0 1 4 8z" />
+            </svg>
+        </a>
+    </div>
+</div>
+{% endblock %}

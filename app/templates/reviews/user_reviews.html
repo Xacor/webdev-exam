@@ -3,33 +3,41 @@
 
 {% block content %}
     <div class="row my-3">
-        {% for rev in reviews %}
-        <div class="d-flex my-3">
-            <div class="flex-shrink-0">
-                <img src="{{ url_for('static', filename='images/default-profile-picture-300x300.jpeg') }}"
-                    class="rounded-circle" alt="Sample Image" height="96px">
-            </div>
-            <div class="flex-grow-1 ms-3">
-                <h5>{{ rev.user.first_name }} {{ rev.user.last_name }} <small class="text-muted"><i>{{ rev.created_at
-                                            }}</i></small></h5>
-                {{ rev.html_text |safe}}
-            </div>
-            <div>
-                {% if rev.rating == 5 %}
-                <span>Отлично</span>
-                {% elif rev.rating == 4 %}
-                <span>Хорошо</span>
-                {% elif rev.rating == 3 %}
-                <span>Удовлетворительно</span>
-                {% elif rev.rating == 2 %}
-                <span>Неудовлетворительно</span>
-                {% elif rev.rating == 1 %}
-                <span>Плохо</span>
-                {% elif rev.rating == 0 %}
-                <span>Ужасно</span>
-                {% endif %}
-            </div>
-        </div>
-        {% endfor %}
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Книга</th>
+                    <th>Статус</th>
+                    <th>Дата отзыва</th>
+                    <th>Оценка</th>
+                    <th>Текст</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for rev in reviews %}
+                <tr>
+                    <td>{{ rev.book.name }}</td>
+                    <td>{{ rev.status.name }}</td>
+                    <td>{{ rev.created_at }}</td>
+                    <td>
+                        {% if rev.rating == 5 %}
+                        <span>Отлично</span>
+                        {% elif rev.rating == 4 %}
+                        <span>Хорошо</span>
+                        {% elif rev.rating == 3 %}
+                        <span>Удовлетворительно</span>
+                        {% elif rev.rating == 2 %}
+                        <span>Неудовлетворительно</span>
+                        {% elif rev.rating == 1 %}
+                        <span>Плохо</span>
+                        {% elif rev.rating == 0 %}
+                        <span>Ужасно</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ rev.html_text |safe }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
     </div>
 {% endblock %}

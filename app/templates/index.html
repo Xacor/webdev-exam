@@ -5,7 +5,7 @@
 {% block content %}
 <div class="row align-items-start my-3">
     {% for book in books %}
-    <div class="card mb-3 py-2 {% if loop.last %} ms-5 {% else %} mx-5 {% endif %}" style="max-width: 540px;" >
+    <div class="card mb-3 py-2 mx-auto" style="max-width: 540px;" >
         <div class="row g-0">
             <div class="col-md-4 my-auto">
                 <img src="{{ book.image.url }}" class="img-fluid rounded-start" alt="">

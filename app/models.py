@@ -121,7 +121,7 @@ class Book(db.Model):
     @property
     def rating(self):
         if self.rating_num > 0:
-            return self.rating_sum / self.rating_num
+            return  '{:,.2f}'.format(self.rating_sum / self.rating_num)
         else:
             return 0
 
@@ -143,10 +143,11 @@ class Review(db.Model):
     rating = db.Column(db.Integer, nullable=False)
     text = db.Column(db.Text, nullable=False)
     created_at = db.Column(db.DateTime, nullable=False, server_default=sa.sql.func.now())
-    status_id = db.Column(db.Integer, db.ForeignKey('statuses.id'), nullable=False, default=0)
+    status_id = db.Column(db.Integer, db.ForeignKey('statuses.id'), nullable=False, default=1)
 
     user = db.relationship('User', uselist=False)
-    book = db.relationship('Book', uselist=False)
+    book = db.relationship('Book', viewonly=True, uselist=False)
+    status = db.relationship('Status', uselist=False)
 
     @property
     def html_text(self):

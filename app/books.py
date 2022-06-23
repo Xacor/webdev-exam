@@ -20,7 +20,6 @@ def params(param):
     return {p: clean(request.form.get(p)) for p in param }
 
 
-
 @bp.route('/')
 def index():
     page = request.args.get('page', 1, type=int)
@@ -28,8 +27,6 @@ def index():
     books = Book.query.all()
     pagination = books.paginate(page, PER_PAGE)
     books = pagination.items
-
-
 
     return render_template('books/index.html', 
                             books=books, 
@@ -54,24 +51,26 @@ def create():
         genre = Genre.query.get(id)
         book.genres.append(genre)
 
-    
-
     try:
         db.session.add(book)
         db.session.commit()
+        
+        f = request.files.get('preview_img')
+        
+        if f and f.filename:
+            img = ImageSaver(f).save(book.id)
+            if not img:
+                return redirect(url_for('index'))
+
+            book.image = img
+            db.session.add(book)
+            db.session.commit()
+
     except SQLAlchemyError as e: 
         db.session.rollback()
         flash(f'При добавлении данных произошла ошибка. \n{e}', category='danger')
         return redirect(url_for('index'))
-    f = request.files.get('preview_img')
-    if f and f.filename:
-        img = ImageSaver(f).save(book.id)
-        if not img:
-            return redirect(url_for('index'))
 
-        book.image = img
-        db.session.add(book)
-        db.session.commit()
 
     flash('Книга успешно создана.',category='success')
     return redirect(url_for('books.show', book_id=book.id))
@@ -91,10 +90,13 @@ def update(book_id):
     book = Book.query.get(book_id)
     genres_ids = list(map(int, request.form.getlist('genres')))
     book.update(params(BOOK_PARAMS), genres_ids)
-
-    db.session.add(book)
-    db.session.commit()
-
+    try:
+        db.session.add(book)
+        db.session.commit()
+    except SQLAlchemyError as e:
+        db.session.rollback()
+        flash(f'При добавлении данных произошла ошибка. \n{e}', category='danger')
+        return redirect(url_for('books.edit', book_id=book_id))
     return redirect(url_for('books.show', book_id=book_id))
 
 @bp.route('/<int:book_id>')
@@ -121,13 +123,20 @@ def review(book_id):
 @check_rights('create_review')
 def create_review(book_id):
     new_review = Review(**params(REVIEW_PARAMS), book_id=book_id, user_id=current_user.id)
-    db.session.add(new_review)
+    
 
     book = Book.query.get(book_id)
     book.rating_num += 1
     book.rating_sum += int(new_review.rating)
 
-    db.session.commit()
+    try:
+        db.session.add(new_review)
+        db.session.commit()
+    except SQLAlchemyError as e:
+        db.session.rollback()
+        flash(f'При добавлении данных произошла ошибка. \n{e}', category='danger')
+        return redirect(url_for('books.review', book_id=book.id))
+
     return redirect(url_for('books.show', book_id=book.id))
 
 @bp.route('/<int:book_id>/delete',  methods=['POST'])
@@ -155,5 +164,3 @@ def delete(book_id):
 
     flash('Книга успешно удалена',category='success')
     return redirect(url_for('index'))
-
-#sqlalchemy.exc.IntegrityError

@@ -34,13 +34,16 @@
                     <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
                         <li class="nav-item">
                             <a class="nav-link {% if request.endpoint == 'users' %}active{% endif %}"
-                                aria-current="page" href="{{ url_for('reviews.user_reviews') }}">Мои рецензии</a>
+                                aria-current="page"
+                                href="{% if current_user.is_moder %} {{ url_for('reviews.moderate_reviews') }} {% else %} {{ url_for('reviews.user_reviews') }} {% endif %}">
+                                {% if current_user.is_moder %}
+                                Модерация рецензий {% else %} Мои рецензии {% endif %}</a>
                         </li>
                         <li class="nav-item">
                             {% if current_user.is_authenticated %}
-                            <a class="nav-link" aria-current="page" href="{{ url_for('auth.logout') }}">Выйти</a>
+                                <a class="nav-link" aria-current="page" href="{{ url_for('auth.logout') }}">Выйти</a>
                             {% else %}
-                            <a class="nav-link {% if request.endpoint == 'auth.login' %}active{% endif %}"
+                                <a class="nav-link {% if request.endpoint == 'auth.login' %}active{% endif %}"
                                 aria-current="page" href="{{ url_for('auth.login') }}">Войти</a>
                             {% endif %}
                         </li>
@@ -61,8 +64,8 @@
         {% endwith %}
     </div>
 
-    <main class="h-100 flex-shrink-0 bg-light">
-        <div class="container h-100 bg-light">
+    <main class="flex-grow-1 bg-light">
+        <div class="container h-100">
             {% block content %}
             <h1>Содержимое по умолчанию</h1>
             {% endblock %}
